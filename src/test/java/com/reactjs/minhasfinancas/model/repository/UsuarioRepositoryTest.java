@@ -31,9 +31,7 @@ public class UsuarioRepositoryTest {
 	public void deveVerificarAExistenciaDeUmEmail() {
 		Usuario usuario = criarUsuario();
 		entityManager.persist(usuario);
-		
 		boolean result = repository.existsByEmail("usuario@email.com");
-		
 		Assertions.assertThat(result).isTrue();
 	}
 	
