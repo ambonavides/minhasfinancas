@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 import lombok.Builder;
 import lombok.Data;
 
-@Data
 @Builder
+@Data
 public class LancamentoDTO {
 	
 	private Long id;

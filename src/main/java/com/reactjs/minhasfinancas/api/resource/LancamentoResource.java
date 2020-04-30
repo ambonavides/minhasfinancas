@@ -3,11 +3,10 @@ package com.reactjs.minhasfinancas.api.resource;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,13 +27,13 @@ import com.reactjs.minhasfinancas.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("api/lancamentos")
+@RequestMapping("/api/lancamentos")
 @RequiredArgsConstructor
 public class LancamentoResource {
 	
 	private final LancamentoService service;
 	private final UsuarioService usuarioService;
-	
+
 	@PostMapping
 	public ResponseEntity salvar(@RequestBody LancamentoDTO dto) {
 		try {
@@ -48,7 +47,7 @@ public class LancamentoResource {
 	}
 	
 	@PutMapping("{id}")
-	public ResponseEntity atualizar(@PathVariable("id") Long id, LancamentoDTO dto) {
+	public ResponseEntity atualizar(@PathVariable("id") Long id, @RequestBody LancamentoDTO dto) {
 		return service.obterPorId(id).map(EntityManager ->{
 			try {
 				Lancamento lancamento = converter(dto);
@@ -69,6 +68,7 @@ public class LancamentoResource {
 		}).orElseGet( () -> new ResponseEntity("Lançamento não encontrado na base de Dados.", HttpStatus.BAD_REQUEST));
 	}
 	
+	@GetMapping
 	public ResponseEntity buscar(
 			@RequestParam(value="descricao", required = false) String descricao, 
 			@RequestParam(value="mes", required = false) Integer mes, 
@@ -80,7 +80,7 @@ public class LancamentoResource {
 		lancamentoFiltro.setAno(ano);
 		
 		Optional<Usuario> usuario = usuarioService.obterPorId(idUsuario);
-		if(usuario.isPresent()) {
+		if(!usuario.isPresent()) {
 			return ResponseEntity.badRequest().body("Não foi possível realizar a consulta. Usuário não encontrado para o id informado.");
 		}else {
 			lancamentoFiltro.setUsuario(usuario.get());
@@ -99,13 +99,18 @@ public class LancamentoResource {
 		lancamento.setValor(dto.getValor());
 		
 		Usuario usuarioRetorno = usuarioService
-				.obterPorId(dto.getId())
+				.obterPorId(dto.getUsuario())
 				.orElseThrow(() -> new RegraNegocioException("Usuário não encontrado para o ID informado."));
 		
 		lancamento.setUsuario(usuarioRetorno);
-		lancamento.setTipo(TipoLancamento.valueOf(dto.getTipo()));
-		lancamento.setStatus(StatusLancamento.valueOf(dto.getStatus()));
 		
+		if(dto.getTipo() != null) {
+			lancamento.setTipo(TipoLancamento.valueOf(dto.getTipo()));
+		}
+			
+		if(dto.getStatus() != null) {
+			lancamento.setStatus(StatusLancamento.valueOf(dto.getStatus()));
+		}
 		
 		return lancamento;
 	}
