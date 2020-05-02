@@ -1,5 +1,6 @@
 package com.reactjs.minhasfinancas.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,8 @@ public interface LancamentoService {
 	public void validar(Lancamento lancametno);
 	
 	public abstract Optional<Lancamento> obterPorId(Long id);
+	
+	public abstract BigDecimal obterSaldoPorUsuario(Long idUsuario);
 	
 	
 }
